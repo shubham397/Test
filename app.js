@@ -938,7 +938,44 @@ app.get('/resolved', (req, res) => {
 
 //When type Missed call and status is attempted to contact and ticket is tagged "return related" for group CHO - Returns
 app.get('/missed', (req, res) => {
-    var subject = req.query.subject;
+    var ticket_id = req.query.ticket;
+    var subject = req.query.subject;//Unattended call from 09799505247
+    var split_subject=subject.split(" ");
+    var phone_number = split_subject[3];
+
+    var unirest = require('unirest');
+
+    var API_KEY = "oYkYNxAoEjwZ6dz1SdNU";
+    var FD_ENDPOINT = "headphonezone";
+
+    var PATH = "/api/v2/tickets";
+    var URL = "https://" + FD_ENDPOINT + ".freshdesk.com" + PATH + "/" + ticket_id;
+
+    var fields = {
+        'custom_fields':
+        {
+            'cf_phone_number': parseInt(phone_number)
+        }
+    }
+
+    var Request = unirest.put(URL);
+
+    Request.auth({
+        user: "namita@headphonezone.in",
+        pass: "hpz#1234",
+        sendImmediately: true
+    })
+        .type('json')
+        .send(fields)
+        .end(function (response) {
+            // console.log(response.body)
+        });
+});
+
+//When type Missed call and status is attempted to contact and ticket is tagged "return related" for group CHO - Returns
+app.get('/missed/return', (req, res) => {
+    var name = req.query.name;
+    var phone = req.query.phone;
 
     var SMS = querystring.escape("Hi, you left us a missed call where you had a question about returns. Our Customer Happiness Officers tried calling you back but couldn't get through. Please call us again at +917506646988. We're available on call from Monday through Saturday, 10 AM to 6:30 PM.");
 
@@ -978,12 +1015,12 @@ app.get('/missed', (req, res) => {
         });
 });
 
-//When type Missed call and status is attempted to contact and ticket is tagged "return related" for group CHO - Returns
-app.get('/missed/return', (req, res) => {
+//When type Missed call and status is attempted to contact and ticket is tagged "order related" for group CHO - Returns
+app.get('/missed/order', (req, res) => {
     var name = req.query.name;
     var phone = req.query.phone;
 
-    var SMS = querystring.escape("Hi, you left us a missed call where you had a question about returns. Our Customer Happiness Officers tried calling you back but couldn't get through. Please call us again at +917506646988. We're available on call from Monday through Saturday, 10 AM to 6:30 PM.");
+    var SMS = querystring.escape("Hi, you left us a missed call where you had a question about orders. Our Customer Happiness Officers tried calling you back but couldn't get through. Please call us again at +917506646988. We're available on call from Monday through Saturday, 10 AM to 6:30 PM.");
 
     axios.get("https://2factor.in/API/R1/?module=TRANS_SMS&apikey=" + api + "&to=" + phone + "&from=HPZONE&msg=" + SMS)
         .then(response => {
@@ -991,7 +1028,7 @@ app.get('/missed/return', (req, res) => {
                 sender_id: "" + response.data.Details,
                 name: "" + name,
                 phone: "" + phone,
-                issue: "missed call where you had a question about returns",
+                issue: "missed call where you had a question about order",
                 delivered: "true"
             })
             setSms.save(function (err) {
@@ -1008,7 +1045,50 @@ app.get('/missed/return', (req, res) => {
                 name: "" + name,
                 phone: "" + phone,
                 delivered: "false",
-                issue: "missed call where you had a question about returns",
+                issue: "missed call where you had a question about order",
+                delivered_at: null
+            })
+            setSms.save(function (err) {
+                if (err) throw err;
+
+                console.log('SMS successfully saved.');
+            });
+
+            res.sendStatus(500);
+        });
+});
+
+//When type Missed call and status is attempted to contact for group Gurus
+app.get('/missed/headphone', (req, res) => {
+    var name = req.query.name;
+    var phone = req.query.phone;
+
+    var SMS = querystring.escape("Hi, you left us a missed call wanting to talk to us about buying new headphones. Our Headphone Gurus tried calling you back but couldn't get through. Please call us again at +917506646988. We're available on call from Monday through Saturday, 10 AM to 6:30 PM.");
+
+    axios.get("https://2factor.in/API/R1/?module=TRANS_SMS&apikey=" + api + "&to=" + phone + "&from=HPZONE&msg=" + SMS)
+        .then(response => {
+            var setSms = new Sms({
+                sender_id: "" + response.data.Details,
+                name: "" + name,
+                phone: "" + phone,
+                issue: "missed call where you had a question new headphones",
+                delivered: "true"
+            })
+            setSms.save(function (err) {
+                if (err) throw err;
+
+                console.log('SMS successfully saved.');
+            });
+
+            res.sendStatus(200);
+        })
+        .catch(error => {
+
+            var setSms = new Sms({
+                name: "" + name,
+                phone: "" + phone,
+                delivered: "false",
+                issue: "missed call where you had a question new headphones",
                 delivered_at: null
             })
             setSms.save(function (err) {
