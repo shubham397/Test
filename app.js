@@ -11,13 +11,14 @@ const api = process.env.API_KEY;
 
 var Sms = require('./models/sms');
 
-mongoose.connect("mongodb://marmeto:shubham1994@ds145463.mlab.com:45463/headphone_zone", function (err) {
+mongoose.connect("mongodb://localhost:27017/headphone_zone", function (err) {
 
     if (err) throw err;
 
     console.log('Successfully connected');
 
 });
+
 
 //Upon Ticket Creation, where source is Portal and Help Issue is "Where is my Order?", "Problem with my Order", "Returns and Exchanges" ONLY where Return Issue is "Check status of return", "Change or Cancel Order", "Payment", "Invoice", "Home Audition Program", "Trade up Program";
 app.get('/where', (req, res) => {

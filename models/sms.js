@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://marmeto:shubham1994@ds145463.mlab.com:45463/headphone_zone", function (err) {
+mongoose.connect("mongodb://localhost:27017/headphone_zone", function (err) {
         if (err) throw err;
     });
 var smsSchema = new mongoose.Schema({
